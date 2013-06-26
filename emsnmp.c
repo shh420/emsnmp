@@ -249,7 +249,11 @@ static int parseVersion ( )
   tlvStructType tlv;
   size = parseTLV(request.buffer, request.index, &tlv);
   if (!((request.buffer[tlv.start] == INTEGER) && 
-        (request.buffer[tlv.vstart] == SNMP_V1))) return -1;
+        (request.buffer[tlv.vstart] == SNMP_V1))) 
+  {
+	  printf("\nerror! this is not snmp v1\n");
+	  return -1;
+  }
   seglen = tlv.nstart - tlv.start;
   size += seglen;
   COPY_SEGMENT(tlv);
@@ -282,17 +286,59 @@ int main(int argc, char *argv[])
   struct sockaddr from;
   int fromlen;
   int retStatus;
+  int on = 1;
+  int i;
   extern void initTable( void );
   initTable();
+//////////////////////////////////////////////////////
+#if 1
+  unsigned char ptr[1024];
+  int len,j;
+  int sockfd;
+  len = constructtrappacket(ptr);
+  for (j=0;j<len;j++)
+  {
+	if ((j != 0) && ((j % 16) == 0))	  
+		printf("\n");
+	printf(" %02x ",ptr[j]);
+  }
+  printf("\n");
+
+  sockfd = socket(AF_INET,SOCK_DGRAM,0);
+  if (sockfd < 0 )
+	  perror("socket error");
+  bzero(&servaddr, sizeof(servaddr));
+  servaddr.sin_family = AF_INET;
+  servaddr.sin_addr.s_addr = htonl("192.168.0.191");
+  servaddr.sin_port = htons(161);
+
+  retStatus = sendto(sockfd,ptr,len,0,(struct sockaddr *)&servaddr,sizeof(struct sockaddr));
+  printf("send %d\n",retStatus);
+  if (retStatus < 0 )
+  {
+	close(sockfd);
+	perror("send error");
+	exit(-1);
+  }
+  close(sockfd);
+  unsigned char localipaddr[50];
+  memset(localipaddr,0,50);
+  getlocalip(localipaddr);
+  for(i=0;i<4;i++)
+	  printf(" %x ",localipaddr[i]);
+  printf("\n");
+#endif
+//////////////////////////////////////////////////////
   snmpfd = socket(AF_INET, SOCK_DGRAM, 0);
   bzero(&servaddr, sizeof(servaddr));
   servaddr.sin_family = AF_INET;
   servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
   servaddr.sin_port = htons(161);
-  retStatus = bind(snmpfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
+	retStatus = bind(snmpfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
 	printf("test %d\n",retStatus);  
 if (retStatus < 0) {
-    printf("Unable to bind to socket (%d)\n", errno);
+    //printf("Unable to bind to socket (%d)\n", errno);
+    perror("Unable to bind to socket ");
     exit(-1);
   }
   printf("Started the SNMP agent\n");

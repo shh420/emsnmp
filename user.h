@@ -13,6 +13,18 @@ int insertEntry ( unsigned char *, int, unsigned char,
                    void *, int, void (*func)(void *, unsigned char *) );
 int setEntry ( int, void *, int, unsigned char, int );
 int getOID ( int, unsigned char *, unsigned char * );
+int getlocalip(unsigned char *localipaddr);
+
+int constructversionfield(unsigned char *position,unsigned char value);
+int constructcommunityfield(unsigned char *position,unsigned char *value,int len);
+int constructpdutypefield(unsigned char *position,unsigned char value);
+int constructenterprisefield(unsigned char *position,unsigned char *value,int len);
+int constructagentaddrfield(unsigned char *position);
+int constructtraptypefield(unsigned char *position,unsigned char value);
+int constructspecificfield(unsigned char *position,int value);
+int constructtimestampfield(unsigned char *position);
+int constructtraptlvfield(unsigned char *position,int *ptr,int num);
+int constructtrappacket(unsigned char *ptr);
 /* SNMP User function return codes */
 #define SUCCESS	 0
 #define OID_NOT_FOUND	 -1
